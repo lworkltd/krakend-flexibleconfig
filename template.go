@@ -62,6 +62,7 @@ type TemplateParser struct {
 	Parser   config.Parser
 	Path     string
 	err      parserError
+	Flag     bool
 }
 
 func (t *TemplateParser) Parse(configFile string) (config.ServiceConfig, error) {
@@ -118,6 +119,8 @@ func (t *TemplateParser) newConfigTemplate() *template.Template {
 	return template.New("config").Funcs(template.FuncMap{
 		"marshal": t.marshal,
 		"include": t.include,
+		"set":     t.set,
+		"get":     t.get,
 	})
 }
 
@@ -129,6 +132,15 @@ func (t *TemplateParser) marshal(v interface{}) string {
 func (t *TemplateParser) include(v interface{}) string {
 	a, _ := ioutil.ReadFile(path.Join(t.Partials, v.(string)))
 	return string(a)
+}
+
+func (t *TemplateParser) set(v interface{}) bool {
+	t.Flag = v.(bool)
+	return t.Flag
+}
+
+func (t *TemplateParser) get() bool {
+	return t.Flag
 }
 
 type parserError struct {
